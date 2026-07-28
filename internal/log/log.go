@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	api "github.com/hrtsegv/proglog/api/v1"
 )
 
 type Log struct {
@@ -72,4 +74,20 @@ func (l *Log) setup() error {
 	}
 
 	return nil
+}
+
+func (l *Log) Append(record *api.Record) (uint64, error) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	off, err := l.activeSegment.Append(record)
+	if err != nil {
+		return 0, err
+	}
+
+	if l.activeSegment.IsMaxed() {
+		err = l.newSegment(off + 1)
+	}
+
+	return off, err
 }
