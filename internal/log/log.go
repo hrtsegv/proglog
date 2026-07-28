@@ -140,3 +140,10 @@ func (l *Log) Reset() error {
 
 	return l.setup()
 }
+
+func (l *Log) LowestOffset() (uint64, error) {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	return l.segments[0].baseOffset, nil
+}
